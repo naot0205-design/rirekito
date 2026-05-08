@@ -723,7 +723,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
                   className="mt-0.5 shrink-0"
                 />
                 <span className="text-xs text-gray-700 leading-relaxed">
-                  提携する有料職業紹介事業者から求人案内を受け取る（任意・デフォルトOFF）
+                  提携する有料職業紹介事業者から求人案内を受け取る（任意）
                 </span>
               </label>
               <label className="flex items-start gap-3 cursor-pointer">
