@@ -88,9 +88,13 @@ export default function TermsPage() {
 
         <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
           <h2 className="text-lg font-semibold text-gray-900">お問い合わせ</h2>
-          <p className="text-gray-500">
+          <p>
+            本規約に関するお問い合わせ、ご意見・ご要望は以下までご連絡ください。原則として5営業日以内に一次回答いたします。
+          </p>
+          <p className="text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-3">
             運営者：土元 直<br />
-            連絡先：nao.t19970205@gmail.com
+            連絡先：<a href="mailto:nao.t19970205@gmail.com" className="text-blue-600 hover:underline">nao.t19970205@gmail.com</a><br />
+            対応時間：平日10:00〜18:00（土日祝・年末年始を除く）
           </p>
         </section>
       </article>
