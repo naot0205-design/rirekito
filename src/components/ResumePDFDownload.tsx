@@ -592,7 +592,6 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
 
   // メアド登録モーダル
   const [modalState, setModalState] = useState<ModalState>("hidden");
-  const [email, setEmail] = useState("");
   const [consentTerms, setConsentTerms] = useState(false);
   const [consentPartner, setConsentPartner] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
@@ -635,12 +634,12 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
     }
     setModalState("hidden");
     performDownload();
-    if (email) {
+    if (basicInfo.phone) {
       fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          phone: basicInfo.phone,
           consentPartnerReferral: consentPartner,
           consentMarketing,
           resumeData: basicInfo,
@@ -690,28 +689,17 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
         }}
       </BlobProvider>
 
-      {/* メアド登録モーダル */}
+      {/* 同意モーダル */}
       {modalState === "showing" && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-5">
             <div>
               <h3 className="text-lg font-bold text-gray-900">PDFをダウンロードする前に</h3>
-              <p className="text-sm text-gray-500 mt-1">
-                メールアドレスを登録すると、転職に役立つ情報をお届けできます（任意）。
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-gray-700">
-                メールアドレス <span className="text-gray-400 font-normal">（任意）</span>
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="example@mail.com"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-              />
+              {basicInfo.phone && (
+                <p className="text-sm text-gray-500 mt-1">
+                  ご入力の電話番号 <span className="font-medium text-gray-800">{basicInfo.phone}</span> を登録します。
+                </p>
+              )}
             </div>
 
             <div className="space-y-3">
@@ -765,7 +753,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
               </button>
               <button
                 onClick={handleModalSubmit}
-                disabled={!email}
+                disabled={!basicInfo.phone}
                 className="flex-[2] bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 登録してダウンロード

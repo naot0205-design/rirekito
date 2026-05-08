@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
 
 interface RegisterBody {
-  email: string;
+  phone: string;
   consentPartnerReferral: boolean;
   consentMarketing: boolean;
   resumeData: Record<string, unknown>;
@@ -17,18 +17,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const { email, consentPartnerReferral, consentMarketing, resumeData, diagnosisType } = body;
+  const { phone, consentPartnerReferral, consentMarketing, resumeData, diagnosisType } = body;
 
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    return NextResponse.json({ error: "メールアドレスが正しくありません。" }, { status: 400 });
+  if (!phone || !/^[\d\-+() ]{7,15}$/.test(phone.replace(/\s/g, ""))) {
+    return NextResponse.json({ error: "電話番号が正しくありません。" }, { status: 400 });
   }
 
-  // upsert: 同じメールが既にあれば同意フラグのみ更新
   const { data: user, error: upsertError } = await supabaseAdmin
     .from("users")
     .upsert(
-      { email, consent_partner_referral: consentPartnerReferral, consent_marketing: consentMarketing },
-      { onConflict: "email" }
+      { phone, consent_partner_referral: consentPartnerReferral, consent_marketing: consentMarketing },
+      { onConflict: "phone" }
     )
     .select("id")
     .single();
