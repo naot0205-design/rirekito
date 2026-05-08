@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { DiagnosisAnswer } from "@/types";
 import { QUESTIONS } from "@/data/questions";
 
@@ -11,6 +11,11 @@ interface Props {
 
 export default function Step2Diagnosis({ onNext, onBack }: Props) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
+
+  // 診断ページに遷移したら最上部にスクロール
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "auto" });
+  }, []);
 
   const setAnswer = (questionId: number, value: string) =>
     setAnswers((prev) => ({ ...prev, [questionId]: value }));

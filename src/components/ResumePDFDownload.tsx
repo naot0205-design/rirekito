@@ -9,9 +9,10 @@ import {
   StyleSheet,
   PDFDownloadLink,
   PDFViewer,
+  BlobProvider,
   Font,
 } from "@react-pdf/renderer";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { BasicInfo, DiagnosisResult } from "@/types";
 
 Font.register({
@@ -583,6 +584,15 @@ interface DownloadProps {
 
 export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled }: DownloadProps) {
   const [showPreview, setShowPreview] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // モバイル判定（iframeのPDFプレビューでページ送りができない端末向け）
+  useEffect(() => {
+    const check = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
 
   if (disabled) {
     return (
@@ -633,9 +643,39 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
               </button>
             </div>
             <div className="flex-1 overflow-hidden">
-              <PDFViewer width="100%" height="100%" showToolbar={false} style={{ border: 0 }}>
-                <ResumeDocument basicInfo={basicInfo} diagnosisResult={diagnosisResult} />
-              </PDFViewer>
+              {isMobile ? (
+                // モバイル：iframe内のPDFは1ページしか表示されないので、新規タブで開く方式
+                <BlobProvider document={<ResumeDocument basicInfo={basicInfo} diagnosisResult={diagnosisResult} />}>
+                  {({ url, loading, error }) => (
+                    <div className="h-full flex flex-col items-center justify-center p-6 text-center space-y-4">
+                      {loading ? (
+                        <p className="text-gray-500 text-sm">PDFを生成中...</p>
+                      ) : error ? (
+                        <p className="text-red-500 text-sm">プレビューの生成に失敗しました</p>
+                      ) : url ? (
+                        <>
+                          <p className="text-gray-700 text-sm">
+                            iPhone・Androidではプレビュー画面で全ページを表示できないため、新しいタブで開いてご確認ください。
+                          </p>
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-block bg-blue-600 text-white px-6 py-3 rounded-xl font-medium hover:bg-blue-700 transition"
+                          >
+                            📄 新しいタブでPDFを開く
+                          </a>
+                          <p className="text-xs text-gray-400">下の「PDFをダウンロード」ボタンからも保存できます</p>
+                        </>
+                      ) : null}
+                    </div>
+                  )}
+                </BlobProvider>
+              ) : (
+                <PDFViewer width="100%" height="100%" showToolbar={false} style={{ border: 0 }}>
+                  <ResumeDocument basicInfo={basicInfo} diagnosisResult={diagnosisResult} />
+                </PDFViewer>
+              )}
             </div>
           </div>
         </div>

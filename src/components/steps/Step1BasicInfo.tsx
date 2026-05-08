@@ -129,7 +129,7 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
 
       {/* 生年月日・性別 */}
       <div className="grid grid-cols-2 gap-4">
-        <div>
+        <div className="min-w-0">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             生年月日 <span className="text-red-500">*</span>
           </label>
@@ -137,15 +137,15 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
             type="date"
             value={data.birthDate}
             onChange={(e) => update("birthDate", e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 box-border"
           />
         </div>
-        <div>
+        <div className="min-w-0">
           <label className="block text-sm font-medium text-gray-700 mb-1">性別</label>
           <select
             value={data.gender}
             onChange={(e) => update("gender", e.target.value)}
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full min-w-0 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 box-border"
           >
             <option value="">選択してください</option>
             <option value="男性">男性</option>
