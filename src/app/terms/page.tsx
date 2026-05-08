@@ -1,0 +1,99 @@
+import Link from "next/link";
+
+export const metadata = {
+  title: "利用規約 | リレキト",
+};
+
+export default function TermsPage() {
+  return (
+    <main className="min-h-screen bg-gray-50 py-12 px-4">
+      <article className="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
+        <header>
+          <Link href="/" className="text-sm text-blue-600 hover:underline">← トップに戻る</Link>
+          <h1 className="text-2xl font-bold text-gray-900 mt-3">利用規約</h1>
+          <p className="text-xs text-gray-500 mt-1">最終更新日：2026年5月8日</p>
+        </header>
+
+        <section className="space-y-3 text-sm text-gray-700 leading-relaxed">
+          <p>
+            本利用規約（以下「本規約」）は、本サービス「リレキト」（以下「本サービス」）の利用条件を定めるものです。ユーザーは本サービスを利用することにより、本規約に同意したものとみなされます。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">第1条（適用）</h2>
+          <p>
+            本規約は、ユーザーと運営者との間の本サービスの利用に関わる一切の関係に適用されます。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">第2条（利用登録）</h2>
+          <p>
+            本サービスの利用に登録は不要です。ユーザーは本サービスにアクセスし、必要事項を入力することで利用を開始できます。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">第3条（禁止事項）</h2>
+          <p>ユーザーは、本サービスの利用にあたり、以下の行為をしてはなりません：</p>
+          <ul className="list-disc list-inside space-y-1 pl-2">
+            <li>法令または公序良俗に違反する行為</li>
+            <li>犯罪行為に関連する行為</li>
+            <li>本サービスのサーバーやネットワークの機能を破壊・妨害する行為</li>
+            <li>他者の情報を無断で入力・登録する行為</li>
+            <li>本サービスを通じて生成された履歴書を、虚偽の内容で第三者に提示する行為</li>
+            <li>過度な頻度でAI機能を利用するなど、本サービスの運営を妨げる行為</li>
+            <li>その他、運営者が不適切と判断する行為</li>
+          </ul>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">第4条（本サービスの提供の停止等）</h2>
+          <p>
+            運営者は、システムメンテナンス、障害、不可抗力等により、ユーザーへの事前通知なく本サービスの提供を停止または中断することができるものとします。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">第5条（生成コンテンツについて）</h2>
+          <p>
+            本サービスが提供する自己PR文章のテンプレートおよびAIブラッシュアップによって生成された文章は、参考情報として提供されるものです。最終的な内容の確認・修正は、ユーザーご自身の責任において行ってください。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">第6条（免責事項）</h2>
+          <p>
+            運営者は、本サービスに事実上または法律上の瑕疵がないことを明示的にも黙示的にも保証しません。本サービスの利用により発生したトラブル・損害について、運営者は一切の責任を負わないものとします。
+          </p>
+          <p>
+            本サービスを通じて作成された履歴書を用いた就職・転職活動の結果について、運営者は一切の責任を負いません。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">第7条（規約の変更）</h2>
+          <p>
+            運営者は、必要と判断した場合には、ユーザーへの通知なく本規約を変更することができるものとします。変更後の規約は、本サービス上に掲載した時点から効力を生じるものとします。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">第8条（準拠法・裁判管轄）</h2>
+          <p>
+            本規約の解釈にあたっては、日本法を準拠法とします。本サービスに関して紛争が生じた場合には、運営者の所在地を管轄する裁判所を専属的合意管轄とします。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">お問い合わせ</h2>
+          <p className="text-gray-500">
+            運営者：（屋号・運営者名を記載）<br />
+            連絡先：（メールアドレスを記載）
+          </p>
+        </section>
+      </article>
+    </main>
+  );
+}

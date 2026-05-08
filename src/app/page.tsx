@@ -1,65 +1,153 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { BasicInfo, DiagnosisAnswer, DiagnosisResult, Step } from "@/types";
+import Step1BasicInfo from "@/components/steps/Step1BasicInfo";
+import Step2Diagnosis from "@/components/steps/Step2Diagnosis";
+import Step3Result from "@/components/steps/Step3Result";
+import Step4Resume from "@/components/steps/Step4Resume";
+
+const DEFAULT_BASIC_INFO: BasicInfo = {
+  name: "",
+  nameKana: "",
+  birthDate: "",
+  gender: "",
+  postalCode: "",
+  address: "",
+  addressKana: "",
+  phone: "",
+  email: "",
+  photo: "",
+  wishes: "貴社の規定に従います。",
+  education: [{ year: "", month: "", description: "", label: "卒業" }],
+  workHistory: [{ year: "", month: "", description: "", label: "入社" }],
+  certifications: [{ name: "", year: "", month: "" }],
+};
+
+const STEP_LABELS = ["基本情報", "自己診断", "診断結果", "履歴書作成"];
 
 export default function Home() {
-  return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+  const [step, setStep] = useState<Step>(1);
+  const [started, setStarted] = useState(false);
+  const [basicInfo, setBasicInfo] = useState<BasicInfo>(DEFAULT_BASIC_INFO);
+  const [diagnosisAnswers, setDiagnosisAnswers] = useState<DiagnosisAnswer[]>([]);
+  const [diagnosisResult, setDiagnosisResult] = useState<DiagnosisResult | null>(null);
+
+  if (!started) {
+    return (
+      <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50 flex items-center justify-center p-4">
+        <div className="max-w-md w-full text-center space-y-8">
+          <div>
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-2xl mb-6 shadow-lg">
+              <span className="text-white text-3xl">📄</span>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-3">
+              リレキト
+            </h1>
+            <p className="text-base text-gray-700 leading-relaxed mb-2">
+              事務職の応募書類、<br />全部まとめて終わらせよう。
+            </p>
+            <p className="text-gray-500 text-sm leading-relaxed">
+              強みを診断するだけで、自己PRが完成。<br />
+              そのまま履歴書PDFで出力できます。
+            </p>
+          </div>
+
+          <div className="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 text-left space-y-3">
+            {[
+              { icon: "📝", text: "基本情報を入力（5分）" },
+              { icon: "🧠", text: "10問の自己診断に答える" },
+              { icon: "✨", text: "AIがあなたのタイプを診断" },
+              { icon: "📄", text: "自己PR入り履歴書をPDF出力" },
+            ].map((item) => (
+              <div key={item.text} className="flex items-center gap-3">
+                <span className="text-xl">{item.icon}</span>
+                <span className="text-sm text-gray-700">{item.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <button
+            onClick={() => setStarted(true)}
+            className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition shadow-md hover:shadow-lg"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            無料ではじめる →
+          </button>
+          <p className="text-xs text-gray-400">登録不要・完全無料</p>
+          <div className="flex justify-center gap-4 text-xs text-gray-400 pt-4">
+            <a href="/privacy" className="hover:text-blue-600 hover:underline">プライバシーポリシー</a>
+            <span>·</span>
+            <a href="/terms" className="hover:text-blue-600 hover:underline">利用規約</a>
+          </div>
         </div>
       </main>
-    </div>
+    );
+  }
+
+  return (
+    <main className="min-h-screen bg-gray-50">
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between mb-3">
+            <span className="font-bold text-gray-800 text-sm">リレキト</span>
+            <span className="text-xs text-gray-400">STEP {step} / 4</span>
+          </div>
+          <div className="flex gap-1">
+            {STEP_LABELS.map((label, i) => (
+              <div key={label} className="flex-1">
+                <div
+                  className={`h-1.5 rounded-full transition-all ${
+                    i + 1 <= step ? "bg-blue-600" : "bg-gray-200"
+                  }`}
+                />
+                <p
+                  className={`text-center text-xs mt-1 ${
+                    i + 1 === step ? "text-blue-600 font-medium" : "text-gray-400"
+                  }`}
+                >
+                  {label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      <div className="max-w-xl mx-auto px-4 py-8">
+        {step === 1 && (
+          <Step1BasicInfo
+            data={basicInfo}
+            onChange={setBasicInfo}
+            onNext={() => setStep(2)}
+          />
+        )}
+        {step === 2 && (
+          <Step2Diagnosis
+            onNext={(answers) => {
+              setDiagnosisAnswers(answers);
+              setStep(3);
+            }}
+            onBack={() => setStep(1)}
+          />
+        )}
+        {step === 3 && (
+          <Step3Result
+            answers={diagnosisAnswers}
+            onNext={(result) => {
+              setDiagnosisResult(result);
+              setStep(4);
+            }}
+            onBack={() => setStep(2)}
+          />
+        )}
+        {step === 4 && diagnosisResult && (
+          <Step4Resume
+            basicInfo={basicInfo}
+            diagnosisResult={diagnosisResult}
+            onBack={() => setStep(3)}
+          />
+        )}
+      </div>
+    </main>
   );
 }
