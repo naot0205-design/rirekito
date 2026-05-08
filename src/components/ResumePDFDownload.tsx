@@ -672,10 +672,14 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
         {({ url, loading }) => {
           const triggerDownload = () => {
             if (!url) return;
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = filename;
-            a.click();
+            if (isMobile) {
+              window.open(url, "_blank", "noopener,noreferrer");
+            } else {
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = filename;
+              a.click();
+            }
           };
           return (
             <button

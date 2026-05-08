@@ -135,7 +135,7 @@ export default function Step3Result({ answers, onNext, onBack }: Props) {
           </div>
           <div className="p-4 space-y-3">
             <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">{job.description}</p>
-            <div className="grid grid-cols-2 gap-2 text-xs text-gray-500">
+            <div className="flex flex-col gap-1 text-xs text-gray-500">
               <div>💰 {job.salary}</div>
               <div>📍 {job.location}</div>
             </div>
