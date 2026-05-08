@@ -21,94 +21,109 @@ export default function PrivacyPage() {
         </section>
 
         <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
-          <h2 className="text-lg font-semibold text-gray-900">1. 取得する情報</h2>
-          <p>本サービスでは、ユーザーが履歴書を作成するために以下の情報を入力していただきます:</p>
+          <h2 className="text-lg font-semibold text-gray-900">1. 取得する情報と利用目的</h2>
+          <p>本サービスでは、以下の情報を取得します:</p>
           <ul className="list-disc list-inside space-y-1 pl-2">
             <li>氏名・フリガナ・生年月日・性別</li>
             <li>住所・電話番号・メールアドレス</li>
             <li>学歴・職歴・資格情報</li>
             <li>顔写真(任意)</li>
-            <li>自己診断の回答</li>
-            <li>自己PR文章(ブラッシュアップ機能利用時)</li>
+            <li>自己診断の回答・自己PR文章</li>
           </ul>
-          <p className="text-gray-600">
-            <strong>利用目的:</strong> 履歴書PDFの生成、自己PR文章の最適化、サービス改善のための統計分析。
+          <p className="text-gray-600 mt-2">
+            <strong>利用目的:</strong>
           </p>
+          <ul className="list-disc list-inside space-y-1 pl-2 text-gray-600">
+            <li>履歴書PDFの生成</li>
+            <li>自己PR文章の最適化（AIブラッシュアップ機能）</li>
+            <li>
+              <strong>PDFダウンロード時にメールアドレスを任意でご登録いただいた場合:</strong>
+              転職に役立つ情報の提供、および同意いただいた場合には提携する有料職業紹介事業者からの求人案内の提供
+            </li>
+            <li>サービス改善のための統計分析</li>
+          </ul>
         </section>
 
         <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
-          <h2 className="text-lg font-semibold text-gray-900">2. 情報の保存・保有期間について</h2>
+          <h2 className="text-lg font-semibold text-gray-900">2. 情報の保存・保有期間</h2>
           <p>
-            ユーザーが入力した個人情報は、原則として本サービスのサーバーには保存されません。情報はお使いのブラウザ上でのみ処理され、ブラウザを閉じる、もしくはページをリロードした時点で消去されます。
+            履歴書作成に利用する個人情報（氏名・住所等）は、原則として本サービスのサーバーに保存されず、ブラウザ上のみで処理されます。
+          </p>
+          <p>
+            PDFダウンロード時に任意でメールアドレスをご登録いただいた場合、当該情報は本サービスのデータベース（Supabase、米国）に保存されます。
           </p>
           <p>
             <strong>保有期間:</strong>
           </p>
           <ul className="list-disc list-inside space-y-1 pl-2">
-            <li>ブラウザ内データ:ユーザーセッション中のみ(ブラウザを閉じれば消去)</li>
-            <li>サーバログ(IPアドレス・アクセス時刻):最大90日間。レート制限・障害調査のため</li>
-            <li>外部AIサービスに送信されたテキスト:Anthropic社の規約に従う(同社では原則として顧客データをモデル学習に使用せず、最大30日間で削除されます)</li>
+            <li>メールアドレス・同意情報・履歴書データ: ユーザーからの削除請求があるまで、または本サービス終了時まで</li>
+            <li>サーバログ(IPアドレス・アクセス時刻): 最大90日間</li>
+            <li>外部AIサービスに送信されたテキスト: Anthropic社の規約に従う(最大30日間で削除)</li>
           </ul>
         </section>
 
         <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
-          <h2 className="text-lg font-semibold text-gray-900">3. 外部サービスへの送信</h2>
+          <h2 className="text-lg font-semibold text-gray-900">3. 第三者への提供</h2>
           <p>
-            自己PRブラッシュアップ機能を利用される際、入力された自己PR文章および強み・経験のテキスト情報は、生成AIサービス(Anthropic社が提供するClaude)に送信されます。当該データの取り扱いについては、各サービスのプライバシーポリシーをご確認ください。
-          </p>
-          <p>
-            なお、氏名・住所・電話番号などの個人を特定可能な情報は、外部AIサービスには送信されません。
-          </p>
-        </section>
-
-        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
-          <h2 className="text-lg font-semibold text-gray-900">4. Cookie・アクセス解析</h2>
-          <p>
-            本サービスでは、サービス改善のためアクセス解析ツール(Google Analytics等)を利用する場合があります。これにより取得されるデータは匿名であり、個人を特定するものではありません。
-          </p>
-        </section>
-
-        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
-          <h2 className="text-lg font-semibold text-gray-900">5. 第三者への提供</h2>
-          <p>
-            本サービスは、法令に基づく場合を除き、ユーザーの同意なく個人情報を第三者に提供することはありません。
-          </p>
-        </section>
-
-        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
-          <h2 className="text-lg font-semibold text-gray-900">6. 開示・訂正・削除請求について</h2>
-          <p>
-            個人情報保護法に基づき、ユーザーはご自身の個人情報の開示・訂正・利用停止・削除を請求できます。
-          </p>
-          <p>
-            本サービスは原則としてサーバ側にユーザーの個人情報を保有しませんが、サーバログに含まれるIPアドレスやアクセス記録の削除をご希望の場合は、下記の問い合わせ窓口までご連絡ください。
+            本サービスは、以下の場合を除き、ユーザーの個人情報を第三者に提供しません:
           </p>
           <ul className="list-disc list-inside space-y-1 pl-2">
-            <li>削除請求の対象:サーバログ内の該当ユーザーに関する記録</li>
-            <li>請求方法:メールに「データ削除請求」と明記してご連絡ください</li>
-            <li>対応期限:原則として2週間以内に対応・回答いたします</li>
+            <li>法令に基づく場合</li>
+            <li>
+              <strong>提携先への求人案内提供:</strong>
+              PDFダウンロード時に「提携する有料職業紹介事業者から求人案内を受け取る」にチェックをいただいた場合に限り、
+              有料職業紹介事業の許可を保有する提携先企業にメールアドレスおよび履歴書情報を提供することがあります。
+              チェックはデフォルトOFF（未選択）であり、ご自身の意思でのみ有効になります。
+            </li>
           </ul>
+          <p className="text-gray-600 text-xs bg-yellow-50 border border-yellow-200 rounded-lg p-3 mt-2">
+            ※ 現時点では提携先は未定です。提携先が決まり次第、本ポリシーを更新のうえ提携先名を明記します。
+            提携先への情報提供を開始する前に、改めてご確認いただける機会を設けます。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">4. 外部サービスへの送信</h2>
+          <p>
+            自己PRブラッシュアップ機能利用時、入力テキストはAnthropic社（Claude）に送信されます。氏名・住所・電話番号などは送信されません。
+          </p>
+          <p>
+            メールアドレス・履歴書データは Supabase, Inc.（米国）のデータベースに保存されます。
+            Supabase のプライバシーポリシーは <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">supabase.com/privacy</a> をご確認ください。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">5. Cookie・アクセス解析</h2>
+          <p>
+            本サービスでは、サービス改善のためアクセス解析ツールを利用する場合があります。取得データは匿名であり、個人を特定するものではありません。
+          </p>
+        </section>
+
+        <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
+          <h2 className="text-lg font-semibold text-gray-900">6. 開示・訂正・削除請求</h2>
+          <p>
+            個人情報保護法に基づき、ご自身の個人情報の開示・訂正・利用停止・削除を請求できます。
+            メールに「データ削除請求」と明記のうえ、下記窓口までご連絡ください。原則として2週間以内に対応します。
+          </p>
         </section>
 
         <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
           <h2 className="text-lg font-semibold text-gray-900">7. インシデント発生時の対応</h2>
           <p>
-            個人情報の漏洩・滅失・毀損等のインシデントが発生した場合、速やかに事実関係を調査し、本サービス上での公表および影響を受けるユーザーへの通知を行います。重大事案については個人情報保護委員会への報告も実施します。
+            個人情報の漏洩・滅失等が発生した場合、速やかに事実関係を調査し、本サービス上での公表および影響を受けるユーザーへの通知を行います。重大事案については個人情報保護委員会への報告も実施します。
           </p>
         </section>
 
         <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
           <h2 className="text-lg font-semibold text-gray-900">8. 改定について</h2>
           <p>
-            本ポリシーは、必要に応じて改定する場合があります。重要な変更がある場合は、本サービス上でお知らせします。
+            本ポリシーは必要に応じて改定します。重要な変更がある場合は、本サービス上でお知らせします。
           </p>
         </section>
 
         <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
-          <h2 className="text-lg font-semibold text-gray-900">9. お問い合わせ・各種請求窓口</h2>
-          <p>
-            本ポリシー、データ削除請求、その他のお問い合わせは以下までご連絡ください。原則として5営業日以内に一次回答いたします。
-          </p>
+          <h2 className="text-lg font-semibold text-gray-900">9. お問い合わせ</h2>
           <p className="text-gray-700 bg-gray-50 border border-gray-200 rounded-lg p-3">
             運営者:土元 直<br />
             連絡先:<a href="mailto:nao.t19970205@gmail.com" className="text-blue-600 hover:underline">nao.t19970205@gmail.com</a><br />

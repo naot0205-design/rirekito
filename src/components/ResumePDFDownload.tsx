@@ -7,12 +7,11 @@ import {
   View,
   Image,
   StyleSheet,
-  PDFDownloadLink,
   PDFViewer,
   BlobProvider,
   Font,
 } from "@react-pdf/renderer";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BasicInfo, DiagnosisResult } from "@/types";
 
 Font.register({
@@ -583,12 +582,22 @@ interface DownloadProps {
 }
 
 type Platform = "ios" | "android" | "other";
+type ModalState = "hidden" | "showing" | "submitting";
 
 export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled }: DownloadProps) {
   const [showPreview, setShowPreview] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [platform, setPlatform] = useState<Platform>("other");
   const [showHelp, setShowHelp] = useState(false);
+
+  // メアド登録モーダル
+  const [modalState, setModalState] = useState<ModalState>("hidden");
+  const [email, setEmail] = useState("");
+  const [consentTerms, setConsentTerms] = useState(false);
+  const [consentPartner, setConsentPartner] = useState(false);
+  const [consentMarketing, setConsentMarketing] = useState(false);
+  const [modalError, setModalError] = useState("");
+  const downloadTriggerRef = useRef<(() => void) | null>(null);
 
   // モバイル判定 + OS判定
   useEffect(() => {
@@ -600,6 +609,42 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
     else if (/Android/.test(ua)) setPlatform("android");
     return () => window.removeEventListener("resize", check);
   }, []);
+
+  const handleDownloadClick = (triggerDownload: () => void) => {
+    downloadTriggerRef.current = triggerDownload;
+    setModalState("showing");
+  };
+
+  const handleModalSubmit = async () => {
+    setModalError("");
+    if (!consentTerms) {
+      setModalError("利用規約・プライバシーポリシーへの同意が必要です。");
+      return;
+    }
+    setModalState("submitting");
+    try {
+      await fetch("/api/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email,
+          consentPartnerReferral: consentPartner,
+          consentMarketing,
+          resumeData: basicInfo,
+          diagnosisType: diagnosisResult.type,
+        }),
+      });
+    } catch {
+      // 登録失敗してもダウンロードは進める
+    }
+    setModalState("hidden");
+    downloadTriggerRef.current?.();
+  };
+
+  const handleModalSkip = () => {
+    setModalState("hidden");
+    downloadTriggerRef.current?.();
+  };
 
   if (disabled) {
     return (
@@ -622,13 +667,113 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
       >
         👁 PDFをプレビュー
       </button>
-      <PDFDownloadLink
-        document={<ResumeDocument basicInfo={basicInfo} diagnosisResult={diagnosisResult} />}
-        fileName={filename}
-        className="block w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition text-center"
-      >
-        {({ loading }) => (loading ? "PDFを生成中..." : "📄 PDFをダウンロード")}
-      </PDFDownloadLink>
+
+      <BlobProvider document={<ResumeDocument basicInfo={basicInfo} diagnosisResult={diagnosisResult} />}>
+        {({ url, loading }) => {
+          const triggerDownload = () => {
+            if (!url) return;
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = filename;
+            a.click();
+          };
+          return (
+            <button
+              onClick={() => handleDownloadClick(triggerDownload)}
+              disabled={loading}
+              className="block w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition text-center disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {loading ? "PDFを生成中..." : "📄 PDFをダウンロード"}
+            </button>
+          );
+        }}
+      </BlobProvider>
+
+      {/* メアド登録モーダル */}
+      {(modalState === "showing" || modalState === "submitting") && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-5">
+            <div>
+              <h3 className="text-lg font-bold text-gray-900">PDFをダウンロードする前に</h3>
+              <p className="text-sm text-gray-500 mt-1">
+                メールアドレスを登録すると、転職に役立つ情報をお届けできます（任意）。
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                メールアドレス <span className="text-gray-400 font-normal">（任意）</span>
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="example@mail.com"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+
+            <div className="space-y-3">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consentTerms}
+                  onChange={(e) => setConsentTerms(e.target.checked)}
+                  className="mt-0.5 shrink-0"
+                />
+                <span className="text-xs text-gray-700 leading-relaxed">
+                  <a href="/terms" target="_blank" className="text-blue-600 underline">利用規約</a>・
+                  <a href="/privacy" target="_blank" className="text-blue-600 underline">プライバシーポリシー</a>
+                  に同意する <span className="text-red-500">*必須</span>
+                </span>
+              </label>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consentPartner}
+                  onChange={(e) => setConsentPartner(e.target.checked)}
+                  className="mt-0.5 shrink-0"
+                />
+                <span className="text-xs text-gray-700 leading-relaxed">
+                  提携する有料職業紹介事業者から求人案内を受け取る（任意・デフォルトOFF）
+                </span>
+              </label>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={consentMarketing}
+                  onChange={(e) => setConsentMarketing(e.target.checked)}
+                  className="mt-0.5 shrink-0"
+                />
+                <span className="text-xs text-gray-700 leading-relaxed">
+                  転職・キャリアに役立つメールマガジンを受け取る（任意）
+                </span>
+              </label>
+            </div>
+
+            {modalError && (
+              <p className="text-xs text-red-600">{modalError}</p>
+            )}
+
+            <div className="flex gap-3">
+              <button
+                onClick={handleModalSkip}
+                disabled={modalState === "submitting"}
+                className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition"
+              >
+                登録せずにダウンロード
+              </button>
+              <button
+                onClick={handleModalSubmit}
+                disabled={modalState === "submitting" || !email}
+                className="flex-[2] bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {modalState === "submitting" ? "送信中..." : "登録してダウンロード"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showPreview && (
         <div
