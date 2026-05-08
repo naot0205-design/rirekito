@@ -75,8 +75,8 @@ export default function PrivacyPage() {
           <h2 className="text-lg font-semibold text-gray-900">7. お問い合わせ</h2>
           <p>本ポリシーに関するお問い合わせは、以下までご連絡ください：</p>
           <p className="text-gray-500">
-            運営者：（屋号・運営者名を記載）<br />
-            連絡先：（メールアドレスを記載）
+            運営者：土元 直<br />
+            連絡先：nao.t19970205@gmail.com
           </p>
         </section>
       </article>

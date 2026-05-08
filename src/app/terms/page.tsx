@@ -89,8 +89,8 @@ export default function TermsPage() {
         <section className="space-y-2 text-sm text-gray-700 leading-relaxed">
           <h2 className="text-lg font-semibold text-gray-900">お問い合わせ</h2>
           <p className="text-gray-500">
-            運営者：（屋号・運営者名を記載）<br />
-            連絡先：（メールアドレスを記載）
+            運営者：土元 直<br />
+            連絡先：nao.t19970205@gmail.com
           </p>
         </section>
       </article>
