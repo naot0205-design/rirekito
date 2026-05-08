@@ -745,17 +745,17 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
 
             <div className="flex gap-3">
               <button
-                onClick={handleModalSkip}
+                onClick={() => setModalState("hidden")}
                 className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition"
               >
-                登録せずにダウンロード
+                戻る
               </button>
               <button
                 onClick={handleModalSubmit}
                 disabled={!basicInfo.phone && !basicInfo.email}
                 className="flex-[2] bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                登録してダウンロード
+                同意してダウンロード
               </button>
             </div>
           </div>
