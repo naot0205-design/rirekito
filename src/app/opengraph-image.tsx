@@ -1,13 +1,13 @@
 import { ImageResponse } from "next/og";
+import { readFileSync } from "fs";
+import { join } from "path";
 
 export const alt = "リレキト｜事務職の履歴書、強み診断で一気に仕上げる";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OgImage() {
-  const fontData = await fetch(
-    "https://fonts.gstatic.com/s/notosansjp/v53/-F6jfjtqLzI2JPCgQBnw7HFyzSD-AsregP8VFBEi75vY0rw-oME.woff2"
-  ).then((res) => res.arrayBuffer());
+  const fontData = readFileSync(join(process.cwd(), "public", "NotoSansJP-Regular.otf"));
 
   return new ImageResponse(
     (
