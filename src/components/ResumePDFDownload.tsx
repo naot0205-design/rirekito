@@ -582,7 +582,7 @@ interface DownloadProps {
 }
 
 type Platform = "ios" | "android" | "other";
-type ModalState = "hidden" | "showing" | "submitting";
+type ModalState = "hidden" | "showing";
 
 export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled }: DownloadProps) {
   const [showPreview, setShowPreview] = useState(false);
@@ -615,15 +615,18 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
     setModalState("showing");
   };
 
-  const handleModalSubmit = async () => {
+  const handleModalSubmit = () => {
     setModalError("");
     if (!consentTerms) {
       setModalError("利用規約・プライバシーポリシーへの同意が必要です。");
       return;
     }
-    setModalState("submitting");
-    try {
-      await fetch("/api/register", {
+    // ユーザー操作コンテキスト内でダウンロードを先に起動
+    setModalState("hidden");
+    downloadTriggerRef.current?.();
+    // API 登録はバックグラウンドで実行（ダウンロードをブロックしない）
+    if (email) {
+      fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -633,12 +636,8 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
           resumeData: basicInfo,
           diagnosisType: diagnosisResult.type,
         }),
-      });
-    } catch {
-      // 登録失敗してもダウンロードは進める
+      }).catch(console.error);
     }
-    setModalState("hidden");
-    downloadTriggerRef.current?.();
   };
 
   const handleModalSkip = () => {
@@ -694,7 +693,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
       </BlobProvider>
 
       {/* メアド登録モーダル */}
-      {(modalState === "showing" || modalState === "submitting") && (
+      {modalState === "showing" && (
         <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-5">
             <div>
@@ -762,17 +761,16 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
             <div className="flex gap-3">
               <button
                 onClick={handleModalSkip}
-                disabled={modalState === "submitting"}
                 className="flex-1 border border-gray-300 text-gray-600 py-2.5 rounded-xl text-sm hover:bg-gray-50 transition"
               >
                 登録せずにダウンロード
               </button>
               <button
                 onClick={handleModalSubmit}
-                disabled={modalState === "submitting" || !email}
+                disabled={!email}
                 className="flex-[2] bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {modalState === "submitting" ? "送信中..." : "登録してダウンロード"}
+                登録してダウンロード
               </button>
             </div>
           </div>
