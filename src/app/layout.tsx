@@ -11,6 +11,19 @@ export const metadata: Metadata = {
   title: "リレキト｜事務職の履歴書、強み診断で一気に仕上げる",
   description:
     "リレキトは事務職への転職に特化した履歴書作成ツール。強みを診断するだけで自己PRが完成し、そのまま履歴書PDFで出力できます。登録不要・完全無料。",
+  openGraph: {
+    title: "リレキト｜事務職の履歴書、強み診断で一気に仕上げる",
+    description: "診断するだけで自己PRが完成。登録不要・完全無料でPDF出力できます。",
+    url: "https://rirekito.vercel.app/",
+    siteName: "リレキト",
+    locale: "ja_JP",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "リレキト｜事務職の履歴書、強み診断で一気に仕上げる",
+    description: "診断するだけで自己PRが完成。登録不要・完全無料でPDF出力できます。",
+  },
 };
 
 export default function RootLayout({
