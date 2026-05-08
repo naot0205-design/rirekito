@@ -634,12 +634,13 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
     }
     setModalState("hidden");
     performDownload();
-    if (basicInfo.phone) {
+    if (basicInfo.phone || basicInfo.email) {
       fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          phone: basicInfo.phone,
+          phone: basicInfo.phone || "",
+          email: basicInfo.email || "",
           consentPartnerReferral: consentPartner,
           consentMarketing,
           resumeData: basicInfo,
@@ -695,11 +696,9 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
           <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-5">
             <div>
               <h3 className="text-lg font-bold text-gray-900">PDFをダウンロードする前に</h3>
-              {basicInfo.phone && (
-                <p className="text-sm text-gray-500 mt-1">
-                  ご入力の電話番号 <span className="font-medium text-gray-800">{basicInfo.phone}</span> を登録します。
-                </p>
-              )}
+              <p className="text-sm text-gray-500 mt-1">
+                ご入力の情報（{[basicInfo.phone, basicInfo.email].filter(Boolean).join(" / ")}）を登録します。
+              </p>
             </div>
 
             <div className="space-y-3">
@@ -753,7 +752,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
               </button>
               <button
                 onClick={handleModalSubmit}
-                disabled={!basicInfo.phone}
+                disabled={!basicInfo.phone && !basicInfo.email}
                 className="flex-[2] bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 登録してダウンロード

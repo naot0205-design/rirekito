@@ -3,6 +3,7 @@ import { supabaseAdmin } from "@/lib/supabase";
 
 interface RegisterBody {
   phone: string;
+  email: string;
   consentPartnerReferral: boolean;
   consentMarketing: boolean;
   resumeData: Record<string, unknown>;
@@ -17,18 +18,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const { phone, consentPartnerReferral, consentMarketing, resumeData, diagnosisType } = body;
+  const { phone, email, consentPartnerReferral, consentMarketing, resumeData, diagnosisType } = body;
 
-  if (!phone || !/^[\d\-+() ]{7,15}$/.test(phone.replace(/\s/g, ""))) {
-    return NextResponse.json({ error: "電話番号が正しくありません。" }, { status: 400 });
+  if (!phone && !email) {
+    return NextResponse.json({ error: "電話番号またはメールアドレスが必要です。" }, { status: 400 });
   }
 
   const { data: user, error: upsertError } = await supabaseAdmin
     .from("users")
-    .upsert(
-      { phone, consent_partner_referral: consentPartnerReferral, consent_marketing: consentMarketing },
-      { onConflict: "phone" }
-    )
+    .insert({ phone: phone || null, email: email || null, consent_partner_referral: consentPartnerReferral, consent_marketing: consentMarketing })
     .select("id")
     .single();
 
