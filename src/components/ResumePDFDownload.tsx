@@ -582,15 +582,22 @@ interface DownloadProps {
   disabled?: boolean;
 }
 
+type Platform = "ios" | "android" | "other";
+
 export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled }: DownloadProps) {
   const [showPreview, setShowPreview] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [platform, setPlatform] = useState<Platform>("other");
+  const [showHelp, setShowHelp] = useState(false);
 
-  // モバイル判定（iframeのPDFプレビューでページ送りができない端末向け）
+  // モバイル判定 + OS判定
   useEffect(() => {
     const check = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
     check();
     window.addEventListener("resize", check);
+    const ua = navigator.userAgent;
+    if (/iPad|iPhone|iPod/.test(ua)) setPlatform("ios");
+    else if (/Android/.test(ua)) setPlatform("android");
     return () => window.removeEventListener("resize", check);
   }, []);
 
@@ -665,7 +672,47 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
                           >
                             📄 新しいタブでPDFを開く
                           </a>
-                          <p className="text-xs text-gray-400">下の「PDFをダウンロード」ボタンからも保存できます</p>
+                          <button
+                            onClick={() => setShowHelp((v) => !v)}
+                            className="text-xs text-blue-600 underline"
+                          >
+                            {showHelp ? "閉じる" : "保存方法はこちら"}
+                          </button>
+                          {showHelp && (
+                            <div className="text-left bg-gray-50 border border-gray-200 rounded-lg p-4 text-xs text-gray-700 leading-relaxed space-y-3 max-w-sm">
+                              {platform === "ios" ? (
+                                <>
+                                  <p className="font-semibold text-gray-900">📱 iOS（iPhone・iPad）の場合</p>
+                                  <ol className="list-decimal list-inside space-y-1.5">
+                                    <li>「新しいタブでPDFを開く」をタップ</li>
+                                    <li>PDF表示中、画面下部の<strong>共有ボタン</strong>（□に↑）をタップ</li>
+                                    <li>メニューから<strong>「ファイルに保存」</strong>を選択</li>
+                                    <li>保存先（iCloud Drive等）を選んで右上の<strong>「保存」</strong>をタップ</li>
+                                  </ol>
+                                  <p className="text-gray-500">※「写真」アプリには保存できません（PDFはファイル形式のため）</p>
+                                </>
+                              ) : platform === "android" ? (
+                                <>
+                                  <p className="font-semibold text-gray-900">📱 Android の場合</p>
+                                  <ol className="list-decimal list-inside space-y-1.5">
+                                    <li>「新しいタブでPDFを開く」をタップ</li>
+                                    <li>PDF表示中、画面右上の<strong>「⋮」（メニュー）</strong>をタップ</li>
+                                    <li><strong>「ダウンロード」</strong>を選択</li>
+                                    <li>「Files」アプリの「ダウンロード」フォルダに保存されます</li>
+                                  </ol>
+                                  <p className="text-gray-500">※または「📄 PDFをダウンロード」ボタンから直接保存も可能</p>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="font-semibold text-gray-900">💾 保存方法</p>
+                                  <ul className="list-disc list-inside space-y-1.5">
+                                    <li>「新しいタブでPDFを開く」後、ブラウザの保存機能を使用</li>
+                                    <li>または「📄 PDFをダウンロード」ボタンで直接保存</li>
+                                  </ul>
+                                </>
+                              )}
+                            </div>
+                          )}
                         </>
                       ) : null}
                     </div>
