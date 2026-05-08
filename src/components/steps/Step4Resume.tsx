@@ -40,20 +40,27 @@ export default function Step4Resume({ basicInfo, diagnosisResult, onBack }: Prop
       const res = await fetch("/api/brushup-pr", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ currentPR: typeDef.selfPR, userStrengths, staffType: diagnosisResult.type }),
+        body: JSON.stringify({ userStrengths, staffType: diagnosisResult.type }),
         signal: abortRef.current.signal,
       });
       if (!res.ok) {
+        // 構造化エラーレスポンスの読み取り
+        const data = await res.json().catch(() => ({ error: "" as string }));
         if (res.status === 429) {
-          const data = await res.json().catch(() => ({ error: "利用上限に達しました" }));
           alert(data.error || "利用上限に達しました。しばらく経ってから再度お試しください。");
           setBrushupState("input");
           setSelfPR(typeDef.selfPR);
           return;
         }
-        const errText = await res.text();
-        console.error("brushup-pr failed:", res.status, errText);
-        throw new Error(`API ${res.status}: ${errText}`);
+        if (res.status === 400) {
+          alert(data.error || "入力内容を確認してください。");
+          setBrushupState("input");
+          setSelfPR(typeDef.selfPR);
+          return;
+        }
+        // 5xxサーバエラー（AI障害含む）
+        console.error("brushup-pr failed:", res.status, data);
+        throw new Error("server_error");
       }
       const reader = res.body!.getReader();
       const decoder = new TextDecoder();
@@ -66,14 +73,20 @@ export default function Step4Resume({ basicInfo, diagnosisResult, onBack }: Prop
       }
       if (!text.trim()) {
         console.error("brushup-pr returned empty stream");
-        throw new Error("空のレスポンス");
+        throw new Error("empty_response");
       }
       setBrushupState("done");
     } catch (e) {
-      if ((e as Error).name !== "AbortError") {
-        setSelfPR(typeDef.selfPR);
-        setBrushupState("idle");
-      }
+      const err = e as Error;
+      if (err.name === "AbortError") return;
+      // ネットワーク障害 / AI障害 / 空レスポンス
+      const msg =
+        err.message === "empty_response"
+          ? "AIからの応答がありませんでした。少し時間をおいて再度お試しください。"
+          : "AIブラッシュアップが利用できません。しばらく経ってから再度お試しいただくか、テンプレートのままご利用ください。";
+      alert(msg);
+      setSelfPR(typeDef.selfPR);
+      setBrushupState("input");
     }
   };
 
