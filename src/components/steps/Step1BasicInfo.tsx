@@ -127,7 +127,7 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
       </div>
 
       {/* 氏名・フリガナ */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             氏名 <span className="text-red-500">*</span>
@@ -155,7 +155,7 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
       </div>
 
       {/* 生年月日・性別 */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="min-w-0">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             生年月日 <span className="text-red-500">*</span>
@@ -220,7 +220,7 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
       </div>
 
       {/* 電話・メール */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             電話番号 <span className="text-red-500">*</span>
