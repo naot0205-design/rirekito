@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { BasicInfo, CertificationEntry, EducationEntry, WorkHistoryEntry } from "@/types";
 
 interface Props {
@@ -8,7 +9,32 @@ interface Props {
   onNext: () => void;
 }
 
+function formatPhone(digits: string): string {
+  const d = digits.replace(/\D/g, "");
+  if (d.length === 11 && /^0[789]0/.test(d)) return `${d.slice(0,3)}-${d.slice(3,7)}-${d.slice(7)}`;
+  if (d.length === 10 && /^0[3-9]/.test(d)) return `${d.slice(0,2)}-${d.slice(2,6)}-${d.slice(6)}`;
+  if (d.length === 10) return `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}`;
+  return d;
+}
+
+function validatePhone(v: string): string {
+  const d = v.replace(/\D/g, "");
+  if (!d) return "電話番号を入力してください。";
+  if (d.length < 10 || d.length > 11) return "10〜11桁で入力してください。";
+  return "";
+}
+
+function validateEmail(v: string): string {
+  if (!v.trim()) return "メールアドレスを入力してください。";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return "メールアドレスの形式が正しくありません。";
+  return "";
+}
+
 export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
+  const [phoneError, setPhoneError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+
   const update = (field: keyof BasicInfo, value: unknown) =>
     onChange({ ...data, [field]: value });
 
@@ -58,7 +84,8 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
   };
 
   const isValid =
-    data.name.trim() && data.nameKana.trim() && data.birthDate && data.email.trim();
+    data.name.trim() && data.nameKana.trim() && data.birthDate &&
+    !validatePhone(data.phone) && !validateEmail(data.email);
 
   return (
     <div className="space-y-8">
@@ -195,14 +222,23 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
       {/* 電話・メール */}
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">電話番号</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            電話番号 <span className="text-red-500">*</span>
+          </label>
           <input
             type="tel"
+            inputMode="numeric"
             value={data.phone}
-            onChange={(e) => update("phone", e.target.value)}
-            placeholder="090-1234-5678"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => {
+              const digits = e.target.value.replace(/\D/g, "");
+              update("phone", digits);
+              if (submitted) setPhoneError(validatePhone(digits));
+            }}
+            onBlur={() => setPhoneError(validatePhone(data.phone))}
+            placeholder="09012345678（ハイフンなし）"
+            className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${phoneError ? "border-red-400" : "border-gray-300"}`}
           />
+          {phoneError && <p className="text-xs text-red-500 mt-1">{phoneError}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -211,10 +247,15 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
           <input
             type="email"
             value={data.email}
-            onChange={(e) => update("email", e.target.value)}
+            onChange={(e) => {
+              update("email", e.target.value);
+              if (submitted) setEmailError(validateEmail(e.target.value));
+            }}
+            onBlur={() => setEmailError(validateEmail(data.email))}
             placeholder="example@email.com"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className={`w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${emailError ? "border-red-400" : "border-gray-300"}`}
           />
+          {emailError && <p className="text-xs text-red-500 mt-1">{emailError}</p>}
         </div>
       </div>
 
@@ -372,8 +413,12 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
       </div>
 
       <button
-        onClick={onNext}
-        disabled={!isValid}
+        onClick={() => {
+          setSubmitted(true);
+          setPhoneError(validatePhone(data.phone));
+          setEmailError(validateEmail(data.email));
+          if (isValid) onNext();
+        }}
         className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
       >
         次へ：自己診断へ進む →

@@ -238,6 +238,14 @@ const s = StyleSheet.create({
   },
 });
 
+function formatPhone(digits: string): string {
+  const d = digits.replace(/\D/g, "");
+  if (d.length === 11 && /^0[789]0/.test(d)) return `${d.slice(0,3)}-${d.slice(3,7)}-${d.slice(7)}`;
+  if (d.length === 10 && /^0[3-9]/.test(d)) return `${d.slice(0,2)}-${d.slice(2,6)}-${d.slice(6)}`;
+  if (d.length === 10) return `${d.slice(0,3)}-${d.slice(3,6)}-${d.slice(6)}`;
+  return d;
+}
+
 interface Props {
   basicInfo: BasicInfo;
   diagnosisResult: DiagnosisResult;
@@ -484,7 +492,7 @@ function ResumeDocument({ basicInfo, diagnosisResult }: Props) {
             <View style={{ width: 109, paddingHorizontal: 5, paddingTop: 2, borderRight: BORDER, borderBottom: BORDER }}>
               <Text style={{ fontSize: 7 }}>電話</Text>
               <View style={{ flex: 1, justifyContent: "center" }}>
-                <Text style={{ fontSize: 9, textAlign: "center" }}>{basicInfo.phone}</Text>
+                <Text style={{ fontSize: 9, textAlign: "center" }}>{formatPhone(basicInfo.phone)}</Text>
               </View>
             </View>
           </View>
