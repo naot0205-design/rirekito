@@ -597,7 +597,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
   const [consentPartner, setConsentPartner] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
   const [modalError, setModalError] = useState("");
-  const downloadTriggerRef = useRef<(() => void) | null>(null);
+  const blobUrlRef = useRef<string | null>(null);
 
   // モバイル判定 + OS判定
   useEffect(() => {
@@ -610,9 +610,21 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  const handleDownloadClick = (triggerDownload: () => void) => {
-    downloadTriggerRef.current = triggerDownload;
-    setModalState("showing");
+  const filename = `履歴書_${basicInfo.name}_${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}${String(new Date().getDate()).padStart(2, "0")}.pdf`;
+
+  const performDownload = () => {
+    const url = blobUrlRef.current;
+    if (!url) return;
+    if (isMobile) {
+      window.open(url, "_blank", "noopener,noreferrer");
+    } else {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
   };
 
   const handleModalSubmit = () => {
@@ -621,10 +633,8 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
       setModalError("利用規約・プライバシーポリシーへの同意が必要です。");
       return;
     }
-    // ユーザー操作コンテキスト内でダウンロードを先に起動
     setModalState("hidden");
-    downloadTriggerRef.current?.();
-    // API 登録はバックグラウンドで実行（ダウンロードをブロックしない）
+    performDownload();
     if (email) {
       fetch("/api/register", {
         method: "POST",
@@ -642,7 +652,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
 
   const handleModalSkip = () => {
     setModalState("hidden");
-    downloadTriggerRef.current?.();
+    performDownload();
   };
 
   if (disabled) {
@@ -656,8 +666,6 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
     );
   }
 
-  const filename = `履歴書_${basicInfo.name}_${new Date().getFullYear()}${String(new Date().getMonth() + 1).padStart(2, "0")}${String(new Date().getDate()).padStart(2, "0")}.pdf`;
-
   return (
     <div className="space-y-2">
       <button
@@ -669,20 +677,10 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
 
       <BlobProvider document={<ResumeDocument basicInfo={basicInfo} diagnosisResult={diagnosisResult} />}>
         {({ url, loading }) => {
-          const triggerDownload = () => {
-            if (!url) return;
-            if (isMobile) {
-              window.open(url, "_blank", "noopener,noreferrer");
-            } else {
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = filename;
-              a.click();
-            }
-          };
+          blobUrlRef.current = url;
           return (
             <button
-              onClick={() => handleDownloadClick(triggerDownload)}
+              onClick={() => setModalState("showing")}
               disabled={loading}
               className="block w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition text-center disabled:opacity-60 disabled:cursor-not-allowed"
             >
