@@ -597,6 +597,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
   const [isMobile, setIsMobile] = useState(false);
   const [platform, setPlatform] = useState<Platform>("other");
   const [showHelp, setShowHelp] = useState(false);
+  const [isLineIAB, setIsLineIAB] = useState(false);
 
   // メアド登録モーダル
   const [modalState, setModalState] = useState<ModalState>("hidden");
@@ -606,7 +607,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
   const [modalError, setModalError] = useState("");
   const blobUrlRef = useRef<string | null>(null);
 
-  // モバイル判定 + OS判定
+  // モバイル判定 + OS判定 + LINE IAB判定
   useEffect(() => {
     const check = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
     check();
@@ -614,6 +615,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
     const ua = navigator.userAgent;
     if (/iPad|iPhone|iPod/.test(ua)) setPlatform("ios");
     else if (/Android/.test(ua)) setPlatform("android");
+    setIsLineIAB(/Line\//i.test(ua));
     return () => window.removeEventListener("resize", check);
   }, []);
 
@@ -622,7 +624,10 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
   const performDownload = () => {
     const url = blobUrlRef.current;
     if (!url) return;
-    if (isMobile) {
+    if (isLineIAB) {
+      // LINE IABはwindow.open(_blank)が封鎖されているため、現在タブでblobを開く
+      window.location.href = url;
+    } else if (isMobile) {
       window.open(url, "_blank", "noopener,noreferrer");
     } else {
       const a = document.createElement("a");
@@ -676,6 +681,14 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
 
   return (
     <div className="space-y-2">
+      {isLineIAB && (
+        <div className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 text-xs text-amber-800 leading-relaxed">
+          📱 <span className="font-semibold">LINEブラウザをご使用中です。</span><br />
+          右上の「…」→「外部ブラウザで開く」でSafari・Chromeから使うと、PDFを簡単に保存できます。<br />
+          このままでもダウンロードできますが、画面が切り替わる場合があります。
+        </div>
+      )}
+
       <button
         onClick={() => setShowPreview(true)}
         className="block w-full border border-blue-600 text-blue-600 py-2.5 rounded-xl font-medium hover:bg-blue-50 transition text-center text-sm"
