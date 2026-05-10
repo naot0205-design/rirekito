@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabase";
+import { rateLimit, getClientIp } from "@/lib/rate-limit";
 
 interface RegisterBody {
   phone: string;
@@ -11,6 +12,12 @@ interface RegisterBody {
 }
 
 export async function POST(req: NextRequest) {
+  const ip = getClientIp(req);
+  const rl = await rateLimit(ip);
+  if (!rl.ok) {
+    return NextResponse.json({ error: "リクエストが多すぎます。しばらくしてから再度お試しください。" }, { status: 429 });
+  }
+
   let body: RegisterBody;
   try {
     body = await req.json();
