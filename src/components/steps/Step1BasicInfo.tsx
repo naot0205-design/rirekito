@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { BasicInfo, CertificationEntry, EducationEntry, WorkHistoryEntry } from "@/types";
 
 interface Props {
@@ -30,13 +30,44 @@ function validateEmail(v: string): string {
   return "";
 }
 
+// PDFの写真枠と同じアスペクト比（105×118）でキャンバスに切り抜く
+const PDF_W = 315; // 105 * 3
+const PDF_H = 354; // 118 * 3
+
+function cropImage(src: string, zoom: number): Promise<string> {
+  return new Promise((resolve) => {
+    const img = new window.Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = PDF_W;
+      canvas.height = PDF_H;
+      const ctx = canvas.getContext("2d")!;
+      const baseScale = Math.max(PDF_W / img.width, PDF_H / img.height);
+      const scale = baseScale * zoom;
+      const drawW = img.width * scale;
+      const drawH = img.height * scale;
+      ctx.drawImage(img, (PDF_W - drawW) / 2, (PDF_H - drawH) / 2, drawW, drawH);
+      resolve(canvas.toDataURL("image/jpeg", 0.92));
+    };
+    img.src = src;
+  });
+}
+
 export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
   const [phoneError, setPhoneError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [originalPhoto, setOriginalPhoto] = useState<string>("");
+  const [zoom, setZoom] = useState(1.0);
 
   const update = (field: keyof BasicInfo, value: unknown) =>
     onChange({ ...data, [field]: value });
+
+  const applyZoom = useCallback(async (src: string, z: number) => {
+    const cropped = await cropImage(src, z);
+    update("photo", cropped);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data, onChange]);
 
   const updateEducation = (index: number, field: keyof EducationEntry, value: string) => {
     const updated = [...data.education];
@@ -79,7 +110,12 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
       return;
     }
     const reader = new FileReader();
-    reader.onloadend = () => update("photo", reader.result as string);
+    reader.onloadend = () => {
+      const src = reader.result as string;
+      setOriginalPhoto(src);
+      setZoom(1.0);
+      cropImage(src, 1.0).then((cropped) => update("photo", cropped));
+    };
     reader.readAsDataURL(file);
   };
 
@@ -114,9 +150,34 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
               className="block w-full text-xs text-gray-600 file:mr-3 file:py-2 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
             />
             <p className="text-xs text-gray-400">推奨：縦横比 4:3、5MB以下</p>
+            {originalPhoto && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs text-gray-500">ズーム</label>
+                  <span className="text-xs text-gray-400">{zoom.toFixed(1)}x</span>
+                </div>
+                <input
+                  type="range"
+                  min={1.0}
+                  max={3.0}
+                  step={0.1}
+                  value={zoom}
+                  onChange={(e) => {
+                    const z = parseFloat(e.target.value);
+                    setZoom(z);
+                    applyZoom(originalPhoto, z);
+                  }}
+                  className="w-full accent-blue-600"
+                />
+              </div>
+            )}
             {data.photo && (
               <button
-                onClick={() => update("photo", "")}
+                onClick={() => {
+                  update("photo", "");
+                  setOriginalPhoto("");
+                  setZoom(1.0);
+                }}
                 className="text-xs text-red-500 hover:text-red-700"
               >
                 削除
