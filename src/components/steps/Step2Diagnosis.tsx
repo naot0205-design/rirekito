@@ -11,6 +11,7 @@ interface Props {
 
 export default function Step2Diagnosis({ onNext, onBack }: Props) {
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [isNavigating, setIsNavigating] = useState(false);
 
   // 診断ページに遷移したら最上部にスクロール
   useEffect(() => {
@@ -93,11 +94,16 @@ export default function Step2Diagnosis({ onNext, onBack }: Props) {
           ← 戻る
         </button>
         <button
-          onClick={handleNext}
-          disabled={!allAnswered}
-          className="flex-[2] bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+          onClick={() => { setIsNavigating(true); handleNext(); }}
+          disabled={!allAnswered || isNavigating}
+          className="flex-[2] bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
         >
-          診断する →
+          {isNavigating ? (
+            <>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              処理中...
+            </>
+          ) : "診断する →"}
         </button>
       </div>
     </div>

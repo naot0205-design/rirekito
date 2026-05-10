@@ -57,6 +57,7 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
   const [phoneError, setPhoneError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [isNavigating, setIsNavigating] = useState(false);
   const [originalPhoto, setOriginalPhoto] = useState<string>("");
   const [zoom, setZoom] = useState(1.0);
 
@@ -478,11 +479,20 @@ export default function Step1BasicInfo({ data, onChange, onNext }: Props) {
           setSubmitted(true);
           setPhoneError(validatePhone(data.phone));
           setEmailError(validateEmail(data.email));
-          if (isValid) onNext();
+          if (isValid) {
+            setIsNavigating(true);
+            onNext();
+          }
         }}
-        className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed"
+        disabled={isNavigating}
+        className="w-full bg-blue-600 text-white py-3 rounded-xl font-medium hover:bg-blue-700 transition disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        次へ：自己診断へ進む →
+        {isNavigating ? (
+          <>
+            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            処理中...
+          </>
+        ) : "次へ：自己診断へ進む →"}
       </button>
     </div>
   );

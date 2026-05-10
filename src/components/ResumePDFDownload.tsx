@@ -605,6 +605,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
   const [consentPartner, setConsentPartner] = useState(false);
   const [consentMarketing, setConsentMarketing] = useState(false);
   const [modalError, setModalError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const blobUrlRef = useRef<string | null>(null);
 
   // モバイル判定 + OS判定 + LINE IAB判定
@@ -645,6 +646,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
       setModalError("利用規約・プライバシーポリシーへの同意が必要です。");
       return;
     }
+    setIsSubmitting(true);
     setModalState("hidden");
     performDownload();
     if (basicInfo.phone || basicInfo.email) {
@@ -773,10 +775,15 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
               </button>
               <button
                 onClick={handleModalSubmit}
-                disabled={!basicInfo.phone && !basicInfo.email}
-                className="flex-[2] bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={(!basicInfo.phone && !basicInfo.email) || isSubmitting}
+                className="flex-[2] bg-blue-600 text-white py-2.5 rounded-xl text-sm font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
               >
-                同意してダウンロード
+                {isSubmitting ? (
+                  <>
+                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    処理中...
+                  </>
+                ) : "同意してダウンロード"}
               </button>
             </div>
           </div>
