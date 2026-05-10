@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { BasicInfo, DiagnosisAnswer, DiagnosisResult, Step } from "@/types";
 import Step1BasicInfo from "@/components/steps/Step1BasicInfo";
 import Step2Diagnosis from "@/components/steps/Step2Diagnosis";
@@ -75,9 +76,9 @@ export default function Home() {
           </button>
           <p className="text-xs text-gray-400">登録不要・完全無料</p>
           <div className="flex justify-center gap-4 text-xs text-gray-400 pt-4">
-            <a href="/privacy" className="hover:text-blue-600 hover:underline">プライバシーポリシー</a>
+            <Link href="/privacy" className="hover:text-blue-600 hover:underline">プライバシーポリシー</Link>
             <span>·</span>
-            <a href="/terms" className="hover:text-blue-600 hover:underline">利用規約</a>
+            <Link href="/terms" className="hover:text-blue-600 hover:underline">利用規約</Link>
           </div>
         </div>
       </main>

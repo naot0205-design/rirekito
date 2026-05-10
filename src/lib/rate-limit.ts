@@ -1,66 +1,86 @@
-// IPベースのレート制限（インメモリ・スライディングウィンドウ）
-// 注意：単一プロセスのインメモリのため、Vercel本番では @upstash/redis などに差し替える必要あり
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
+// Upstash Redis が未設定の場合（ローカル開発等）はインメモリフォールバック
+function createLimiters() {
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token) {
+    return null;
+  }
+
+  const redis = new Redis({ url, token });
+
+  return {
+    minute: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(5, "1 m"),
+      prefix: "rl:min",
+    }),
+    hour: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(10, "1 h"),
+      prefix: "rl:hr",
+    }),
+    day: new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(20, "1 d"),
+      prefix: "rl:day",
+    }),
+  };
+}
+
+// インメモリフォールバック（ローカル開発用・Vercelでは使われない）
 type Window = { count: number; resetAt: number };
-type Store = Map<string, Window>;
-
-const minuteStore: Store = new Map();
-const hourStore: Store = new Map();
-const dayStore: Store = new Map();
-
-const LIMITS = {
+const memStore = {
+  minute: new Map<string, Window>(),
+  hour: new Map<string, Window>(),
+  day: new Map<string, Window>(),
+};
+const MEM_LIMITS = {
   minute: { max: 5, windowMs: 60 * 1000 },
   hour: { max: 10, windowMs: 60 * 60 * 1000 },
   day: { max: 20, windowMs: 24 * 60 * 60 * 1000 },
-} as const;
-
-function check(store: Store, key: string, max: number, windowMs: number): { ok: boolean; resetAt: number } {
+};
+function memCheck(store: Map<string, Window>, key: string, max: number, windowMs: number) {
   const now = Date.now();
   const w = store.get(key);
   if (!w || w.resetAt < now) {
-    const resetAt = now + windowMs;
-    store.set(key, { count: 1, resetAt });
-    return { ok: true, resetAt };
+    store.set(key, { count: 1, resetAt: now + windowMs });
+    return { ok: true, resetAt: now + windowMs };
   }
-  if (w.count >= max) {
-    return { ok: false, resetAt: w.resetAt };
-  }
+  if (w.count >= max) return { ok: false, resetAt: w.resetAt };
   w.count++;
   return { ok: true, resetAt: w.resetAt };
 }
-
-// 期限切れエントリの掃除（メモリリーク防止）。1分ごとにstaleなキーを削除
-let cleanupTimer: NodeJS.Timeout | null = null;
-function startCleanup() {
-  if (cleanupTimer) return;
-  cleanupTimer = setInterval(() => {
-    const now = Date.now();
-    [minuteStore, hourStore, dayStore].forEach((store) => {
-      for (const [key, w] of store) {
-        if (w.resetAt < now) store.delete(key);
-      }
-    });
-  }, 60 * 1000);
-  // unrefがあればプロセス終了を妨げないよう設定
-  if (typeof cleanupTimer === "object" && "unref" in cleanupTimer) {
-    (cleanupTimer as { unref: () => void }).unref();
-  }
-}
-startCleanup();
 
 export type RateLimitResult =
   | { ok: true }
   | { ok: false; retryAfterSec: number; reason: "minute" | "hour" | "day" };
 
-export function rateLimit(ip: string): RateLimitResult {
-  const m = check(minuteStore, ip, LIMITS.minute.max, LIMITS.minute.windowMs);
-  if (!m.ok) return { ok: false, retryAfterSec: Math.ceil((m.resetAt - Date.now()) / 1000), reason: "minute" };
+export async function rateLimit(ip: string): Promise<RateLimitResult> {
+  const limiters = createLimiters();
 
-  const h = check(hourStore, ip, LIMITS.hour.max, LIMITS.hour.windowMs);
-  if (!h.ok) return { ok: false, retryAfterSec: Math.ceil((h.resetAt - Date.now()) / 1000), reason: "hour" };
+  if (!limiters) {
+    // フォールバック：インメモリ
+    for (const [key, { max, windowMs }] of Object.entries(MEM_LIMITS) as [keyof typeof MEM_LIMITS, { max: number; windowMs: number }][]) {
+      const r = memCheck(memStore[key], ip, max, windowMs);
+      if (!r.ok) return { ok: false, retryAfterSec: Math.ceil((r.resetAt - Date.now()) / 1000), reason: key };
+    }
+    return { ok: true };
+  }
 
-  const d = check(dayStore, ip, LIMITS.day.max, LIMITS.day.windowMs);
-  if (!d.ok) return { ok: false, retryAfterSec: Math.ceil((d.resetAt - Date.now()) / 1000), reason: "day" };
+  // Upstash Redis
+  const [m, h, d] = await Promise.all([
+    limiters.minute.limit(ip),
+    limiters.hour.limit(ip),
+    limiters.day.limit(ip),
+  ]);
+
+  if (!m.success) return { ok: false, retryAfterSec: Math.ceil((m.reset - Date.now()) / 1000), reason: "minute" };
+  if (!h.success) return { ok: false, retryAfterSec: Math.ceil((h.reset - Date.now()) / 1000), reason: "hour" };
+  if (!d.success) return { ok: false, retryAfterSec: Math.ceil((d.reset - Date.now()) / 1000), reason: "day" };
 
   return { ok: true };
 }
