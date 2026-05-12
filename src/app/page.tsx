@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { BasicInfo, DiagnosisAnswer, DiagnosisResult, Step } from "@/types";
 import Step1BasicInfo from "@/components/steps/Step1BasicInfo";
@@ -33,6 +33,13 @@ export default function Home() {
   const [basicInfo, setBasicInfo] = useState<BasicInfo>(DEFAULT_BASIC_INFO);
   const [diagnosisAnswers, setDiagnosisAnswers] = useState<DiagnosisAnswer[]>([]);
   const [diagnosisResult, setDiagnosisResult] = useState<DiagnosisResult | null>(null);
+
+  // URLの ?ref= をsessionStorageに保存（ページ遷移後も保持）
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) sessionStorage.setItem("ref_source", ref);
+  }, []);
 
   if (!started) {
     return (

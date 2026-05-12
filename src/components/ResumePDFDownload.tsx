@@ -650,6 +650,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
     setModalState("hidden");
     performDownload();
     if (basicInfo.phone || basicInfo.email) {
+      const refSource = sessionStorage.getItem("ref_source") || null;
       fetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -660,6 +661,7 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
           consentMarketing,
           resumeData: basicInfo,
           diagnosisType: diagnosisResult.type,
+          refSource,
         }),
       }).catch(console.error);
     }
