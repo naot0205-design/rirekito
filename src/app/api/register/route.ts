@@ -10,6 +10,9 @@ interface RegisterBody {
   resumeData: Record<string, unknown>;
   diagnosisType: string;
   refSource?: string | null;
+  jobChangeTiming?: string | null;
+  employmentType?: string | null;
+  preferredLocation?: string | null;
 }
 
 export async function POST(req: NextRequest) {
@@ -26,7 +29,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
-  const { phone, email, consentPartnerReferral, consentMarketing, resumeData, diagnosisType, refSource } = body;
+  const { phone, email, consentPartnerReferral, consentMarketing, resumeData, diagnosisType, refSource, jobChangeTiming, employmentType, preferredLocation } = body;
 
   if (!phone && !email) {
     return NextResponse.json({ error: "電話番号またはメールアドレスが必要です。" }, { status: 400 });
@@ -34,7 +37,7 @@ export async function POST(req: NextRequest) {
 
   const { data: user, error: upsertError } = await supabaseAdmin
     .from("users")
-    .insert({ phone: phone || null, email: email || null, consent_partner_referral: consentPartnerReferral, consent_marketing: consentMarketing, ref_source: refSource || null })
+    .insert({ phone: phone || null, email: email || null, consent_partner_referral: consentPartnerReferral, consent_marketing: consentMarketing, ref_source: refSource || null, job_change_timing: jobChangeTiming || null, employment_type: employmentType || null, preferred_location: preferredLocation || null })
     .select("id")
     .single();
 

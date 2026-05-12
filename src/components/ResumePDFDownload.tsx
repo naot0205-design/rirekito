@@ -608,6 +608,11 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
   const [isSubmitting, setIsSubmitting] = useState(false);
   const blobUrlRef = useRef<string | null>(null);
 
+  // アンケート
+  const [jobChangeTiming, setJobChangeTiming] = useState("");
+  const [employmentType, setEmploymentType] = useState("");
+  const [preferredLocation, setPreferredLocation] = useState("");
+
   // モバイル判定 + OS判定 + LINE IAB判定
   useEffect(() => {
     const check = () => setIsMobile(window.matchMedia("(max-width: 768px)").matches);
@@ -662,6 +667,9 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
           resumeData: basicInfo,
           diagnosisType: diagnosisResult.type,
           refSource,
+          jobChangeTiming: jobChangeTiming || null,
+          employmentType: employmentType || null,
+          preferredLocation: preferredLocation || null,
         }),
       }).catch(console.error);
     }
@@ -724,6 +732,64 @@ export default function ResumePDFDownload({ basicInfo, diagnosisResult, disabled
               <p className="text-sm text-gray-500 mt-1">
                 ご入力の情報（{[basicInfo.phone, basicInfo.email].filter(Boolean).join(" / ")}）を登録します。
               </p>
+            </div>
+
+            {/* アンケート（任意） */}
+            <div className="bg-gray-50 rounded-xl p-4 space-y-3">
+              <p className="text-xs font-semibold text-gray-600">📋 転職状況を教えてください（任意・3問）</p>
+              <div className="space-y-2">
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">転職希望時期</label>
+                  <select
+                    value={jobChangeTiming}
+                    onChange={(e) => setJobChangeTiming(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
+                    <option value="">未選択</option>
+                    <option value="1ヶ月以内">1ヶ月以内</option>
+                    <option value="1〜3ヶ月以内">1〜3ヶ月以内</option>
+                    <option value="3〜6ヶ月以内">3〜6ヶ月以内</option>
+                    <option value="6ヶ月以上">6ヶ月以上先</option>
+                    <option value="まだ決めていない">まだ決めていない</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">現在の雇用形態</label>
+                  <select
+                    value={employmentType}
+                    onChange={(e) => setEmploymentType(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
+                    <option value="">未選択</option>
+                    <option value="正社員">正社員</option>
+                    <option value="契約社員">契約社員</option>
+                    <option value="パート・アルバイト">パート・アルバイト</option>
+                    <option value="派遣社員">派遣社員</option>
+                    <option value="フリーランス">フリーランス</option>
+                    <option value="無職・求職中">無職・求職中</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">希望勤務地</label>
+                  <select
+                    value={preferredLocation}
+                    onChange={(e) => setPreferredLocation(e.target.value)}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  >
+                    <option value="">未選択</option>
+                    <option value="北海道">北海道</option>
+                    <option value="東北">東北</option>
+                    <option value="首都圏（東京・神奈川・埼玉・千葉）">首都圏（東京・神奈川・埼玉・千葉）</option>
+                    <option value="北関東・甲信越">北関東・甲信越</option>
+                    <option value="東海">東海</option>
+                    <option value="北陸">北陸</option>
+                    <option value="関西">関西</option>
+                    <option value="中国・四国">中国・四国</option>
+                    <option value="九州・沖縄">九州・沖縄</option>
+                    <option value="どこでも可">どこでも可</option>
+                  </select>
+                </div>
+              </div>
             </div>
 
             <div className="space-y-3">
